@@ -104,10 +104,13 @@ class VaporWorkCommand extends Command
 
         $queue = $this->worker->getManager()->connection('sqs');
 
-        return new VaporJob(
-            $this->laravel, $queue->getSqs(), $normalizedMessage,
-            'sqs', $this->queueUrl($message)
-        );
+        return $this->laravel->make(VaporJob::class, [
+            'container' => $this->laravel,
+            'sqs' => $queue->getSqs(),
+            'job' => $normalizedMessage,
+            'connectionName' => 'sqs',
+            'queue' => $this->queueUrl($message),
+        ]);
     }
 
     /**

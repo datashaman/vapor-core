@@ -20,10 +20,13 @@ class VaporQueue extends SqsQueue
         ]);
 
         if (! is_null($response['Messages']) && count($response['Messages']) > 0) {
-            return tap(new VaporJob(
-                $this->container, $this->sqs, $response['Messages'][0],
-                $this->connectionName, $queue
-            ), function ($job) {
+            return tap($this->container->make(VaporJob::class, [
+                'container' => $this->container,
+                'sqs' => $this->sqs,
+                'job' => $response['Messages'][0],
+                'connectionName' => $this->connectionName,
+                'queue' => $queue,
+            ]), function ($job) {
                 $this->container
                      ->make(JobAttempts::class)
                      ->increment($job);
